@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './modules/users/users.module';
+import { FaceApiModule } from 'modules/face-api/face-api.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [FaceApiModule],
   controllers: [],
   providers: [],
 })

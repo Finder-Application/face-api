@@ -19,7 +19,7 @@ COPY --from=builder /home/app/package.json /home/app/
 COPY --from=builder /home/app/yarn.lock /home/app/
 
 RUN yarn global add pm2
-RUN yarn add cross-env 
+RUN yarn add cross-env
 COPY --from=builder /home/app/dist /home/app/dist
 
 EXPOSE 4000

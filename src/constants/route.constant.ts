@@ -1,2 +1,2 @@
-export const GLOBAL_PATH = 'api';
-export const PATH_DOCUMENT = 'api/docs';
+export const GLOBAL_PATH = 'face-api';
+export const PATH_DOCUMENT = 'face-api/docs';

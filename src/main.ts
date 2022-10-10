@@ -1,30 +1,28 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { GLOBAL_PATH, PATH_DOCUMENT } from './constants';
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule } from '@nestjs/swagger';
+import initFaceApi from 'initFaceApi';
+import configSwagger from 'swagger';
 import { loggerWinston } from 'utils/logger';
+import { AppModule } from './app.module';
+import { GLOBAL_PATH, PATH_DOCUMENT } from './constants';
+import { json } from 'body-parser';
 
 async function bootstrap() {
+  await initFaceApi();
   const app = await NestFactory.create(AppModule);
-
   app.setGlobalPrefix(GLOBAL_PATH);
   app.useGlobalPipes(
     new ValidationPipe({
       transformerPackage: require('class-transformer'),
     }),
   );
-  // * setup documents
-  // TODO: Write more information for documents
-  const config = new DocumentBuilder()
-    .setTitle('Hybrid bot Api Documentation')
-    .setDescription('The Hybrid API description .........')
-    .setVersion('1.0')
-    .addTag('Hybrid')
-    .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup(`${PATH_DOCUMENT}`, app, document);
+
+  /// middleware
+  app.use(json({ limit: '5mb' }));
 
   // config listen
   await app.listen(process.env.PORT || 4000);
