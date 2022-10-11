@@ -16,7 +16,7 @@ export class FaceApiController {
 
   @Post('/face-matcher')
   async compareFace(@Body() faceMatcherDto: FaceMatcherDto) {
-    const { descriptor1, descriptor2 } = faceMatcherDto;
-    return this.faceApi.faceMatcher(descriptor1, descriptor2);
+    const { descriptors, descriptor2 } = faceMatcherDto;
+    return this.faceApi.faceMatcher(descriptors, descriptor2);
   }
 }

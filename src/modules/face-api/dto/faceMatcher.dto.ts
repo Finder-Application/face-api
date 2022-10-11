@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EXAMPLE_DESCRIPTOR_1 } from '../examples/descriptor1';
-import { EXAMPLE_DESCRIPTOR_2 } from '../examples/descriptor2';
+import {
+  EXAMPLE_DESCRIPTOR_1,
+  EXAMPLE_DESCRIPTOR_2,
+} from '../examples/descriptor';
 
 export interface Descriptor {
   0: number;
@@ -134,9 +136,9 @@ export interface Descriptor {
 }
 export class FaceMatcherDto {
   @ApiProperty({
-    example: EXAMPLE_DESCRIPTOR_1,
+    example: [EXAMPLE_DESCRIPTOR_1],
   })
-  descriptor1: Descriptor;
+  descriptors: Descriptor[];
 
   @ApiProperty({
     example: EXAMPLE_DESCRIPTOR_2,
