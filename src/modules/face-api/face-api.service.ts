@@ -60,6 +60,8 @@ export class FaceApiService {
       Float32Array.from(Object.values(descriptor1)),
       1,
     ).findBestMatch(Float32Array.from(Object.values(descriptor2)));
-    return minus(1, distance);
+    return {
+      similarity: minus(1, distance),
+    };
   }
 }

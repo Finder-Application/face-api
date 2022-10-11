@@ -1,5 +1,6 @@
 import * as faceApi from '@vladmandic/face-api/dist/face-api.node';
-
+import NP from 'number-precision';
+NP.enableBoundaryChecking(false);
 async function initFaceApi() {
   const modelPath = './src/models';
   console.log('======== Setting up environment and loading models ======== ');
