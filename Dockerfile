@@ -1,16 +1,30 @@
-FROM node:16.15.0-alpine as builder
+FROM node:lts AS dist
+COPY package.json yarn.lock ./
 
-WORKDIR /home/app
+RUN yarn install --network-timeout 1000000
 
-COPY package.json /home/app/
-COPY yarn.lock /home/app/
+RUN rm -rf tsconfig.build.tsbuildinfo
 
-RUN yarn install
-
-COPY . /home/app/
+COPY . ./
 
 RUN yarn build
-CMD ["yarn", "start:prod"]
 
-EXPOSE 4000
+RUN rm -rf tsconfig.build.tsbuildinfo
 
+FROM node:lts AS node_modules
+COPY package.json yarn.lock ./
+
+RUN yarn install --prod --network-timeout 1000000
+
+FROM node:lts
+
+RUN mkdir -p /usr/src/app
+
+WORKDIR /usr/src/app
+
+COPY --from=dist dist /usr/src/app/dist
+COPY --from=node_modules node_modules /usr/src/app/node_modules
+
+COPY . /usr/src/app
+
+CMD [ "yarn", "start:prod" ]
