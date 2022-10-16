@@ -1,6 +1,6 @@
-import * as path from 'path';
-import * as winston from 'winston';
-import * as winstonDaily from 'winston-daily-rotate-file';
+import path from 'path';
+import winston from 'winston';
+import winstonDaily from 'winston-daily-rotate-file';
 
 function stringify(value: any) {
   switch (typeof value) {

@@ -141,7 +141,7 @@ export class FaceMatcherDto {
   descriptors: Descriptor[];
 
   @ApiProperty({
-    example: EXAMPLE_DESCRIPTOR_2,
+    example: [EXAMPLE_DESCRIPTOR_2],
   })
-  descriptor2: Descriptor;
+  descriptorCompare: Descriptor[];
 }

@@ -1,5 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ResponseMessage } from 'utils';
+import { ApiMultiFile } from './decorators/ApiFile';
 import { DetectImageDto } from './dto/decectImage.dto';
 import { FaceMatcherDto } from './dto/faceMatcher.dto';
 import { FaceApiService } from './face-api.service';
@@ -8,15 +18,25 @@ import { FaceApiService } from './face-api.service';
 @Controller('')
 export class FaceApiController {
   constructor(private faceApi: FaceApiService) {}
+
   @Post('/detect')
-  async detectImage(@Body() detectImageDto: DetectImageDto) {
-    const { files } = detectImageDto;
-    return Promise.all(files.map((file) => this.faceApi.detectImage(file)));
+  @ApiConsumes('multipart/form-data')
+  @ApiMultiFile()
+  @UseInterceptors(FilesInterceptor('files'))
+  async detectImage(@UploadedFiles() files: DetectImageDto[]) {
+    try {
+      return await Promise.all(
+        files.map((file) => this.faceApi.detectImage(file)),
+      );
+    } catch (error) {
+      return ResponseMessage(error.message, 'BAD_REQUEST');
+    }
   }
 
   @Post('/face-matcher')
+  @HttpCode(200)
   async compareFace(@Body() faceMatcherDto: FaceMatcherDto) {
-    const { descriptors, descriptor2 } = faceMatcherDto;
-    return this.faceApi.faceMatcher(descriptors, descriptor2);
+    const { descriptors, descriptorCompare } = faceMatcherDto;
+    return this.faceApi.faceMatcher(descriptors, descriptorCompare);
   }
 }

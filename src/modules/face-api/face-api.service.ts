@@ -3,12 +3,12 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as faceApi from '@vladmandic/face-api';
 import { minus } from 'number-precision';
 import { ResponseMessage } from 'utils';
-import { v4 as uuidv4 } from 'uuid';
 import { Descriptor } from './dto/faceMatcher.dto';
 
 @Injectable()
 export class FaceApiService {
   constructor() {}
+
   convertBase64ToBinary(base64: string) {
     const Window = require('window');
     const BASE64_MARKER = ';base64,';
@@ -23,7 +23,7 @@ export class FaceApiService {
     return array;
   }
 
-  decodeImageToTensor(content: Uint8Array) {
+  async decodeImageToTensor(content: Uint8Array) {
     const decoded = tf.node.decodeImage(content);
     const casted = decoded.toFloat();
     const result = casted.expandDims(0);
@@ -31,14 +31,14 @@ export class FaceApiService {
     casted.dispose();
     return result;
   }
-  async detectImage(base64: string) {
-    const unit8ArrayData = this.convertBase64ToBinary(base64);
-    const tensorData = this.decodeImageToTensor(unit8ArrayData);
+
+  // ** detect image by base64
+  async detectImage(file: any) {
+    const tensor = await this.decodeImageToTensor(file.buffer);
     const results = await faceApi
-      .detectAllFaces(tensorData as unknown as faceApi.TNetInput)
+      .detectAllFaces(tensor as unknown as faceApi.TNetInput)
       .withFaceLandmarks()
       .withFaceDescriptors();
-
     if (results.length === 0) {
       return ResponseMessage(`Can't find the face in the photo`, 'BAD_REQUEST');
     }
@@ -50,21 +50,27 @@ export class FaceApiService {
       );
     }
     return {
-      id: uuidv4(),
-      descriptor: results[0].descriptor,
+      results,
     };
   }
 
-  async faceMatcher(descriptors: Descriptor[], descriptor2: Descriptor) {
-    const convertsArray32 = descriptors.map((descriptor) =>
+  async faceMatcher(descriptors: Descriptor[], descriptors2: Descriptor[]) {
+    const convertsFloat1 = descriptors.map((descriptor) =>
       Float32Array.from(Object.values(descriptor)),
     );
-    const { distance } = new faceApi.FaceMatcher(
-      convertsArray32,
-      1,
-    ).findBestMatch(Float32Array.from(Object.values(descriptor2)));
-    return {
-      similarity: minus(1, distance),
-    };
+
+    const convertsFloat2 = descriptors2.map((descriptor) =>
+      Float32Array.from(Object.values(descriptor)),
+    );
+
+    return convertsFloat1.some((floatItem) => {
+      const { distance } = new faceApi.FaceMatcher(
+        convertsFloat2,
+        1,
+      ).findBestMatch(Float32Array.from(Object.values(floatItem)));
+      return {
+        similarity: minus(1, distance),
+      };
+    });
   }
 }

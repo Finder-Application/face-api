@@ -7,10 +7,11 @@ import { loggerWinston } from 'utils/logger';
 import { AppModule } from './app.module';
 import { GLOBAL_PATH, PATH_DOCUMENT } from './constants';
 import { json } from 'body-parser';
-
 async function bootstrap() {
   await initFaceApi();
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
+  app.use(json({ limit: '100mb' }));
   app.setGlobalPrefix(GLOBAL_PATH);
   app.useGlobalPipes(
     new ValidationPipe({
@@ -20,9 +21,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup(`${PATH_DOCUMENT}`, app, document);
-
-  /// middleware
-  app.use(json({ limit: '5mb' }));
 
   // config listen
   await app.listen(process.env.PORT || 4000);

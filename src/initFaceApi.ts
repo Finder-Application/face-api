@@ -4,10 +4,11 @@ NP.enableBoundaryChecking(false);
 async function initFaceApi() {
   const modelPath = './src/models';
   console.log('======== Setting up environment and loading models ======== ');
+
+  await faceApi.tf.setBackend('tensorflow');
+  await faceApi.tf.enableProdMode();
+  await faceApi.tf.ENV.set('DEBUG', false);
   await Promise.all([
-    faceApi.tf.setBackend('tensorflow'),
-    faceApi.tf.enableProdMode(),
-    faceApi.tf.ENV.set('DEBUG', false),
     faceApi.tf.ready(),
     faceApi.nets.ssdMobilenetv1.loadFromDisk(modelPath),
     faceApi.nets.faceRecognitionNet.loadFromDisk(modelPath),
