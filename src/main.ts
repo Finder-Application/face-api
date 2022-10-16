@@ -23,7 +23,7 @@ async function bootstrap() {
   SwaggerModule.setup(`${PATH_DOCUMENT}`, app, document);
 
   // config listen
-  await app.listen(process.env.PORT || 4000);
+  await app.listen(process.env.FACE_PORT || 4000);
   const API_URL = await app.getUrl();
   loggerWinston.info(
     `======= Api ======== : Application is running on: ${API_URL}`,
