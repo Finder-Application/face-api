@@ -50,7 +50,7 @@ export class FaceApiService {
       );
     }
     return {
-      results,
+      data: results.map((result) => result.descriptor),
     };
   }
 

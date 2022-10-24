@@ -1,30 +1,22 @@
 FROM node:lts AS dist
 COPY package.json yarn.lock ./
 
-RUN yarn install --network-timeout 1000000
+
+WORKDIR /home/app	RUN yarn install --network-timeout 1000000
 
 RUN rm -rf tsconfig.build.tsbuildinfo
+COPY package.json /home/app/
+COPY yarn.lock /home/app
 
-COPY . ./
 
-RUN yarn build
+RUN yarn install	COPY . ./
 
-RUN rm -rf tsconfig.build.tsbuildinfo
+COPY . /home/app/
 
-FROM node:lts AS node_modules
-COPY package.json yarn.lock ./
 
-RUN yarn install --prod --network-timeout 1000000
+RUN yarn build	RUN yarn build
+CMD ["yarn", "start:prod"]
 
-FROM node:lts
 
-RUN mkdir -p /usr/src/app
+EXPOSE 4000
 
-WORKDIR /usr/src/app
-
-COPY --from=dist dist /usr/src/app/dist
-COPY --from=node_modules node_modules /usr/src/app/node_modules
-
-COPY . /usr/src/app
-
-CMD [ "yarn", "start:prod" ]
