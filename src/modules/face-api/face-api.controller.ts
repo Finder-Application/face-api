@@ -25,9 +25,10 @@ export class FaceApiController {
   @UseInterceptors(FilesInterceptor('files'))
   async detectImage(@UploadedFiles() files: DetectImageDto[]) {
     try {
-      return await Promise.all(
+      const data = await Promise.all(
         files.map((file) => this.faceApi.detectImage(file)),
       );
+      return { data };
     } catch (error) {
       return ResponseMessage(error.message, 'BAD_REQUEST');
     }

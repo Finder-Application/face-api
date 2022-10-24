@@ -49,9 +49,7 @@ export class FaceApiService {
         'BAD_REQUEST',
       );
     }
-    return {
-      data: results.map((result) => result.descriptor),
-    };
+    return results.map((result) => result.descriptor);
   }
 
   async faceMatcher(descriptors: Descriptor[], descriptors2: Descriptor[]) {
