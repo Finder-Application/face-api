@@ -3,10 +3,5 @@ export const ResponseMessage = (
   error: string,
   status: keyof typeof HttpStatus,
 ) => {
-  throw new HttpException(
-    {
-      error,
-    },
-    HttpStatus[status],
-  );
+  throw new HttpException(error, HttpStatus[status]);
 };
