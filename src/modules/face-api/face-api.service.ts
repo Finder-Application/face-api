@@ -3,8 +3,9 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as faceApi from '@vladmandic/face-api';
 import { ApiConfigService } from 'configs/apiConfig.service';
 import { minus } from 'number-precision';
-import { ResponseMessage } from 'utils';
 import { Descriptor } from './dto/faceMatcher.dto';
+import resizeImg from 'resize-img';
+import { ResponseMessage } from 'utils';
 
 @Injectable()
 export class FaceApiService {
@@ -35,7 +36,13 @@ export class FaceApiService {
 
   // ** detect image by base64
   async detectImage(file: any) {
-    const tensor = await this.decodeImageToTensor(file.buffer);
+    const image = await resizeImg(file.buffer, {
+      width: 1000,
+      height: 1000,
+      format: 'jpg',
+    });
+    const tensor = await this.decodeImageToTensor(image);
+
     const results = await faceApi
       .detectAllFaces(tensor as unknown as faceApi.TNetInput)
       .withFaceLandmarks()

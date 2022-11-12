@@ -7,7 +7,7 @@ async function initFaceApi() {
 
   await faceApi.tf.setBackend('tensorflow');
   await faceApi.tf.enableProdMode();
-  await faceApi.tf.ENV.set('DEBUG', false);
+  await faceApi.tf.ENV.set('DEBUG', true);
   await Promise.all([
     faceApi.tf.ready(),
     faceApi.nets.ssdMobilenetv1.loadFromDisk(modelPath),
