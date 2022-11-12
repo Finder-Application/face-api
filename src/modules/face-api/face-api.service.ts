@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import * as tf from '@tensorflow/tfjs-node';
 import * as faceApi from '@vladmandic/face-api';
+import { ApiConfigService } from 'configs/apiConfig.service';
 import { minus } from 'number-precision';
 import { ResponseMessage } from 'utils';
 import { Descriptor } from './dto/faceMatcher.dto';
 
 @Injectable()
 export class FaceApiService {
-  constructor() {}
+  constructor(private apiConfig: ApiConfigService) {}
 
   convertBase64ToBinary(base64: string) {
     const Window = require('window');
@@ -61,14 +62,16 @@ export class FaceApiService {
       Float32Array.from(Object.values(descriptor)),
     );
 
-    return convertsFloat1.some((floatItem) => {
+    const isMatcher = convertsFloat1.some((floatItem) => {
       const { distance } = new faceApi.FaceMatcher(
         convertsFloat2,
         1,
       ).findBestMatch(Float32Array.from(Object.values(floatItem)));
-      return {
-        similarity: minus(1, distance),
-      };
+
+      return minus(1, distance) > Number(this.apiConfig.get('MATCHER'));
     });
+    return {
+      isMatcher,
+    };
   }
 }
