@@ -6,6 +6,7 @@ import { minus } from 'number-precision';
 import { Descriptor } from './dto/faceMatcher.dto';
 import resizeImg from 'resize-img';
 import { ResponseMessage } from 'utils';
+import { loadImage } from 'canvas';
 
 @Injectable()
 export class FaceApiService {
@@ -41,10 +42,10 @@ export class FaceApiService {
       height: 1000,
       format: 'jpg',
     });
-    const tensor = await this.decodeImageToTensor(image);
 
+    const tensor = await this.decodeImageToTensor(image);
     const results = await faceApi
-      .detectAllFaces(tensor as unknown as faceApi.TNetInput)
+      .detectAllFaces(tensor as any)
       .withFaceLandmarks()
       .withFaceDescriptors();
     if (results.length === 0) {
@@ -69,16 +70,20 @@ export class FaceApiService {
       Float32Array.from(Object.values(descriptor)),
     );
 
+    let distanceTwoFaces = 1;
     const isMatcher = convertsFloat1.some((floatItem) => {
       const { distance } = new faceApi.FaceMatcher(
         convertsFloat2,
         1,
       ).findBestMatch(Float32Array.from(Object.values(floatItem)));
-
+      distanceTwoFaces = distance;
       return minus(1, distance) > Number(this.apiConfig.get('MATCHER'));
     });
+
     return {
       isMatcher,
+      distance: distanceTwoFaces,
+      similar: minus(1, distanceTwoFaces),
     };
   }
 }

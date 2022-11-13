@@ -1,7 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-
 export class DetectImageDto {
-  files: {
+  file: {
     buffer: Uint8Array;
   };
 }
