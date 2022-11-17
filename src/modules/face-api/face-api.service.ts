@@ -62,6 +62,12 @@ export class FaceApiService {
   }
 
   async faceMatcher(descriptors: Descriptor[], descriptors2: Descriptor[]) {
+    if (!descriptors.length || !descriptors2.length) {
+      return {
+        isMatcher: false,
+        similar: 0,
+      };
+    }
     const convertsFloat1 = descriptors.map((descriptor) =>
       Float32Array.from(Object.values(descriptor)),
     );
@@ -71,11 +77,12 @@ export class FaceApiService {
     );
 
     let distanceTwoFaces = 1;
+
     const isMatcher = convertsFloat1.some((floatItem) => {
       const { distance } = new faceApi.FaceMatcher(
         convertsFloat2,
         1,
-      ).findBestMatch(Float32Array.from(Object.values(floatItem)));
+      ).findBestMatch(floatItem);
       distanceTwoFaces = distance;
       return minus(1, distance) > Number(this.apiConfig.get('MATCHER'));
     });
