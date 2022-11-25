@@ -44,8 +44,11 @@ export class FaceApiService {
     });
 
     const tensor = await this.decodeImageToTensor(image);
+    const optionsSSDMobileNet = new faceApi.SsdMobilenetv1Options({
+      minConfidence: 0.5,
+    });
     const results = await faceApi
-      .detectAllFaces(tensor as any)
+      .detectAllFaces(tensor as any, optionsSSDMobileNet)
       .withFaceLandmarks()
       .withFaceDescriptors();
     if (results.length === 0) {
@@ -81,7 +84,7 @@ export class FaceApiService {
     const isMatcher = convertsFloat1.some((floatItem) => {
       const { distance } = new faceApi.FaceMatcher(
         convertsFloat2,
-        1,
+        0.6,
       ).findBestMatch(floatItem);
       distanceTwoFaces = distance;
       return minus(1, distance) > Number(this.apiConfig.get('MATCHER'));
