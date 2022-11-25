@@ -1,4 +1,3 @@
-import { Canvas, Image, ImageData } from 'canvas';
 import * as faceApi from '@vladmandic/face-api/dist/face-api.node';
 import NP from 'number-precision';
 NP.enableBoundaryChecking(false);
@@ -7,7 +6,6 @@ async function initFaceApi() {
   console.log('======== Setting up environment and loading models ======== ');
 
   await Promise.all([
-    faceApi.env.monkeyPatch({ Canvas, Image, ImageData }),
     faceApi.tf.setBackend('tensorflow'),
     faceApi.tf.enableProdMode(),
     faceApi.tf.ENV.set('DEBUG', false),

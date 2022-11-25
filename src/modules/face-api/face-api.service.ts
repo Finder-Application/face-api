@@ -3,10 +3,9 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as faceApi from '@vladmandic/face-api';
 import { ApiConfigService } from 'configs/apiConfig.service';
 import { minus } from 'number-precision';
-import { Descriptor } from './dto/faceMatcher.dto';
 import resizeImg from 'resize-img';
 import { ResponseMessage } from 'utils';
-import { loadImage } from 'canvas';
+import { Descriptor } from './dto/faceMatcher.dto';
 
 @Injectable()
 export class FaceApiService {
