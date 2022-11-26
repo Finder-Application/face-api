@@ -7,6 +7,7 @@ import { loggerWinston } from 'utils/logger';
 import { AppModule } from './app.module';
 import { GLOBAL_PATH, PATH_DOCUMENT } from './constants';
 import { json } from 'body-parser';
+import { ApiConfigService } from 'configs/apiConfig.service';
 async function bootstrap() {
   await initFaceApi();
   const app = await NestFactory.create(AppModule);
@@ -18,18 +19,21 @@ async function bootstrap() {
       transformerPackage: require('class-transformer'),
     }),
   );
-
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup(`${PATH_DOCUMENT}`, app, document);
 
   // config listen
   await app.listen(process.env.FACE_PORT || 4000);
   const API_URL = await app.getUrl();
+
   loggerWinston.info(
     `======= Api ======== : Application is running on: ${API_URL}`,
   );
   loggerWinston.info(
     `======= Docs ======= : Application is running on: ${API_URL}/${PATH_DOCUMENT}`,
+  );
+  loggerWinston.info(
+    `======= MATCHER ======= : Application is running on MATCHER: ${process.env.MATCHER}`,
   );
 }
 bootstrap();
