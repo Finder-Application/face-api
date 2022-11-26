@@ -39,7 +39,6 @@ export class FaceApiService {
     const image = await resizeImg(file.buffer, {
       width: 1000,
       height: 1000,
-      format: 'jpg',
     });
 
     const tensor = await this.decodeImageToTensor(image);
