@@ -4,8 +4,9 @@ NP.enableBoundaryChecking(false);
 async function initFaceApi() {
   const modelPath = './src/models';
   console.log('======== Setting up environment and loading models ======== ');
-
+  const { Canvas, Image, ImageData } = require('canvas');
   await Promise.all([
+    faceApi.env.monkeyPatch({ Canvas, Image, ImageData }),
     faceApi.tf.setBackend('tensorflow'),
     faceApi.tf.enableProdMode(),
     faceApi.tf.ENV.set('DEBUG', false),

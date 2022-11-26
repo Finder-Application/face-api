@@ -6,7 +6,7 @@ import { minus } from 'number-precision';
 import resizeImg from 'resize-img';
 import { ResponseMessage } from 'utils';
 import { Descriptor } from './dto/faceMatcher.dto';
-
+import canvas from 'canvas';
 @Injectable()
 export class FaceApiService {
   constructor(private apiConfig: ApiConfigService) {}
@@ -36,17 +36,14 @@ export class FaceApiService {
 
   // ** detect image by base64
   async detectImage(file: any) {
-    const image = await resizeImg(file.buffer, {
-      width: 1000,
-      height: 1000,
-    });
-
-    const tensor = await this.decodeImageToTensor(image);
+    const img = (await canvas.loadImage(
+      file.buffer,
+    )) as unknown as faceApi.TNetInput;
     const optionsSSDMobileNet = new faceApi.SsdMobilenetv1Options({
-      minConfidence: 0.5,
+      minConfidence: 0.3,
     });
     const results = await faceApi
-      .detectAllFaces(tensor as any, optionsSSDMobileNet)
+      .detectAllFaces(img, optionsSSDMobileNet)
       .withFaceLandmarks()
       .withFaceDescriptors();
     if (results.length === 0) {
