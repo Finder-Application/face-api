@@ -30,7 +30,7 @@ export class FaceApiController {
       );
       return { data };
     } catch (error) {
-      return ResponseMessage(error.message, 'BAD_REQUEST');
+      return ResponseMessage(error.errors[0].response, 'BAD_REQUEST');
     }
   }
 

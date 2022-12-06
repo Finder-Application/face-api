@@ -34,29 +34,45 @@ export class FaceApiService {
     return result;
   }
 
-  // ** detect image by base64
-  async detectImage(file: any) {
+  async detect(buffer: Buffer, options: faceApi.SsdMobilenetv1Options) {
     const img = (await canvas.loadImage(
-      file.buffer,
+      buffer,
     )) as unknown as faceApi.TNetInput;
-    const optionsSSDMobileNet = new faceApi.SsdMobilenetv1Options({
-      minConfidence: 0.3,
-    });
     const results = await faceApi
-      .detectAllFaces(img, optionsSSDMobileNet)
+      .detectAllFaces(img, options)
       .withFaceLandmarks()
       .withFaceDescriptors();
     if (results.length === 0) {
-      return ResponseMessage(`Can't find the face in the photo`, 'BAD_REQUEST');
+      throw ResponseMessage(`Can't find the face in the photo`, 'BAD_REQUEST');
     }
 
     if (results.length > 1) {
-      return ResponseMessage(
+      throw ResponseMessage(
         `Please provide image have only one face`,
         'BAD_REQUEST',
       );
     }
     return results.map((result) => result.descriptor);
+  }
+
+  // ** detect image by base64
+  async detectImage(file: any) {
+    const img = (await canvas.loadImage(
+      file.buffer,
+    )) as unknown as faceApi.TNetInput;
+
+    const optionsSSDMobileNet1 = new faceApi.SsdMobilenetv1Options({
+      minConfidence: 0.5,
+    });
+
+    const optionsSSDMobileNet2 = new faceApi.SsdMobilenetv1Options({
+      minConfidence: 0.2,
+    });
+    const result = await Promise.any([
+      this.detect(file.buffer, optionsSSDMobileNet2),
+      this.detect(file.buffer, optionsSSDMobileNet1),
+    ]);
+    return result;
   }
 
   async faceMatcher(descriptors: Descriptor[], descriptors2: Descriptor[]) {
