@@ -1,34 +1,41 @@
-FROM node:lts AS dist
-COPY package.json yarn.lock ./
+###################
+# BUILD FOR LOCAL DEVELOPMENT
+###################
 
-RUN yarn install --network-timeout 1000000
+FROM node:16-alpine AS development
+WORKDIR /usr/src/app
+RUN apk add python3 make g++
+# Set environment variable for Python
+ENV PYTHON /usr/bin/python3
+COPY --chown=node:node package.json ./
+COPY --chown=node:node yarn.lock ./
+RUN yarn
+USER node
 
-RUN rm -rf tsconfig.build.tsbuildinfo
+###################
+# BUILD FOR PRODUCTION
+###################
 
-COPY . ./
+FROM node:16-alpine As build
+WORKDIR /usr/src/app
+
+COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+
+COPY --chown=node:node . .
 
 RUN yarn build
 
-RUN rm -rf tsconfig.build.tsbuildinfo
+ENV NODE_ENV production
 
-FROM node:lts AS node_modules
-COPY package.json yarn.lock ./
+USER node
 
-RUN yarn install --prod --network-timeout 1000000
+###################
+# PRODUCTION
+###################
 
-FROM node:lts
+FROM --platform=linux/amd64 node:16-alpine As production
 
-ARG PORT=4000
+COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
-RUN mkdir -p /usr/src/app
-
-WORKDIR /usr/src/app
-
-COPY --from=dist dist /usr/src/app/dist
-COPY --from=node_modules node_modules /usr/src/app/node_modules
-
-COPY . /usr/src/app
-
-EXPOSE 4000
-
-CMD [ "yarn", "start:prod" ]
+CMD [ "node", "dist/main.js" ]
