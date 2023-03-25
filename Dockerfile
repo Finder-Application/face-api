@@ -1,4 +1,5 @@
-FROM node:lts AS dist
+FROM node:16-alpine AS dist
+WORKDIR /app
 COPY package.json yarn.lock ./
 
 RUN yarn install --network-timeout 1000000
@@ -11,24 +12,18 @@ RUN yarn build
 
 RUN rm -rf tsconfig.build.tsbuildinfo
 
-FROM node:lts AS node_modules
+FROM node:16-alpine AS node_modules
+WORKDIR /app
 COPY package.json yarn.lock ./
-
 RUN yarn install --prod --network-timeout 1000000
 
-FROM node:lts
-
+FROM node:16-alpine
 ARG PORT=4000
-
-RUN mkdir -p /usr/src/app
+WORKDIR /app
 
 WORKDIR /usr/src/app
-
-COPY --from=dist dist /usr/src/app/dist
-COPY --from=node_modules node_modules /usr/src/app/node_modules
-
-COPY . /usr/src/app
-
+COPY --from=dist dist app/dist
+COPY --from=node_modules node_modules app/node_modules
+COPY . /app
 EXPOSE 4000
-
 CMD [ "yarn", "start:prod" ]
