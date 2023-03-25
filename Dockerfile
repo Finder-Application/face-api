@@ -2,14 +2,21 @@
 # BUILD FOR LOCAL DEVELOPMENT
 ###################
 
-FROM --platform=linux/amd64 node:16-alpine AS development
+FROM node:16-alpine AS development
+# RUN npm install -g pnpm
+# RUN apk add python3 make g++
+# # Set environment variable for Python
+# ENV PYTHON /usr/bin/python3
 WORKDIR /usr/src/app
-RUN apk add python3 make g++
-# Set environment variable for Python
-ENV PYTHON /usr/bin/python3
+RUN sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
 COPY --chown=node:node package.json ./
 COPY --chown=node:node yarn.lock ./
+# RUN pnpm fetch --prod
+
+# COPY --chown=node:node . .
 RUN yarn
+
 USER node
 
 ###################
@@ -23,7 +30,7 @@ COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modul
 
 COPY --chown=node:node . .
 
-RUN yarn build
+RUN npm run build
 
 ENV NODE_ENV production
 
