@@ -2,7 +2,7 @@
 # BUILD FOR LOCAL DEVELOPMENT
 ###################
 
-FROM node:16-alpine AS development
+FROM --platform=linux/amd64 node:16-alpine AS development
 WORKDIR /usr/src/app
 RUN apk add python3 make g++
 # Set environment variable for Python
@@ -16,7 +16,7 @@ USER node
 # BUILD FOR PRODUCTION
 ###################
 
-FROM node:16-alpine As build
+FROM --platform=linux/amd64 node:16-alpine As build
 WORKDIR /usr/src/app
 
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
