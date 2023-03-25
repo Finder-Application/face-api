@@ -1,27 +1,29 @@
 FROM node:lts AS dist
-WORKDIR /app
-COPY package.json yarn.lock ./
+WORKDIR /usr/src/app
+COPY --chown=node:node . .
+RUN yarn 
+USER node
 
-RUN yarn install --network-timeout 1000000
+FROM node:lts As build
+WORKDIR /usr/src/app
 
-RUN rm -rf tsconfig.build.tsbuildinfo
+COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
 
-COPY . ./
+COPY --chown=node:node . .
 
-RUN yarn build
+RUN npm run build
 
-RUN rm -rf tsconfig.build.tsbuildinfo
+ENV NODE_ENV production
 
-FROM node:lts AS node_modules
-WORKDIR /app
-COPY --from=dist app/package.json app/package.json
-COPY --from=dist app/yarn.lock app/yarn.lock
-RUN yarn install --prod --network-timeout 1000000
+USER node
 
-FROM node:16-alpine
+###################
+# PRODUCTION
+###################
+
+FROM node:16-alpine As production
 ARG PORT=4000
-COPY --from=dist app/dist ./dist
-COPY --from=node_modules app/node_modules ./node_modules
-COPY . /app
+COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 EXPOSE 4000
-CMD [ "node", "dist/main" ]
+CMD [ "node", "dist/main.js" ]
