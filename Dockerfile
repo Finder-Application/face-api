@@ -27,4 +27,4 @@ COPY --from=dist app/dist app/dist
 COPY --from=node_modules app/node_modules app/node_modules
 COPY . /app
 EXPOSE 4000
-CMD [ "yarn", "start:prod" ]
+CMD [ "node", "dist/main" ]
