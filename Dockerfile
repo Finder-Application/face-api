@@ -20,11 +20,8 @@ RUN yarn install --prod --network-timeout 1000000
 
 FROM node:16-alpine
 ARG PORT=4000
-WORKDIR /app
-
-WORKDIR /usr/src/app
-COPY --from=dist app/dist app/dist
-COPY --from=node_modules app/node_modules app/node_modules
+COPY --from=dist app/dist ./dist
+COPY --from=node_modules app/node_modules ./node_modules
 COPY . /app
 EXPOSE 4000
 CMD [ "node", "dist/main" ]
