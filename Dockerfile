@@ -1,48 +1,34 @@
-###################
-# BUILD FOR LOCAL DEVELOPMENT
-###################
+FROM node:lts AS dist
+COPY package.json yarn.lock ./
 
-FROM --platform=linux node:16-alpine AS development
-# RUN npm install -g pnpm
-# RUN apk add python3 make g++
-# # Set environment variable for Python
-# ENV PYTHON /usr/bin/python3
-WORKDIR /usr/src/app
-# RUN yum -y update && yum install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+RUN yarn install --network-timeout 1000000
 
-COPY --chown=node:node package.json ./
-COPY --chown=node:node yarn.lock ./
-# RUN pnpm fetch --prod
+RUN rm -rf tsconfig.build.tsbuildinfo
 
-# COPY --chown=node:node . .
-RUN yarn install --build-from-source
+COPY . ./
 
-USER node
+RUN yarn build
 
-###################
-# BUILD FOR PRODUCTION
-###################
+RUN rm -rf tsconfig.build.tsbuildinfo
 
-FROM --platform=linux/amd64 node:16-alpine As build
+FROM node:lts AS node_modules
+COPY package.json yarn.lock ./
+
+RUN yarn install --prod --network-timeout 1000000
+
+FROM node:lts
+
+ARG PORT=4000
+
+RUN mkdir -p /usr/src/app
+
 WORKDIR /usr/src/app
 
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=dist dist /usr/src/app/dist
+COPY --from=node_modules node_modules /usr/src/app/node_modules
 
-COPY --chown=node:node . .
+COPY . /usr/src/app
 
-RUN npm run build
+EXPOSE 4000
 
-ENV NODE_ENV production
-
-USER node
-
-###################
-# PRODUCTION
-###################
-
-FROM --platform=linux/amd64 node:16-alpine As production
-
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-
-CMD [ "node", "dist/main.js" ]
+CMD [ "yarn", "start:prod" ]
