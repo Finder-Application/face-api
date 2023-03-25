@@ -1,4 +1,4 @@
-FROM node:16-alpine AS dist
+FROM node:lts AS dist
 WORKDIR /app
 COPY package.json yarn.lock ./
 
@@ -12,12 +12,12 @@ RUN yarn build
 
 RUN rm -rf tsconfig.build.tsbuildinfo
 
-FROM node:16-alpine AS node_modules
+FROM node:lts AS node_modules
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --prod --network-timeout 1000000
 
-FROM node:16-alpine
+FROM node:lts
 ARG PORT=4000
 WORKDIR /app
 
