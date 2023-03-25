@@ -8,7 +8,7 @@ FROM --platform=linux node:16-alpine AS development
 # # Set environment variable for Python
 # ENV PYTHON /usr/bin/python3
 WORKDIR /usr/src/app
-RUN apk update && apk add build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+RUN yum -y update && yum install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 
 COPY --chown=node:node package.json ./
 COPY --chown=node:node yarn.lock ./
