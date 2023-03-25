@@ -14,7 +14,8 @@ RUN rm -rf tsconfig.build.tsbuildinfo
 
 FROM node:lts AS node_modules
 WORKDIR /app
-COPY package.json yarn.lock ./
+COPY --from=dist app/package.json app/package.json
+COPY --from=dist app/yarn.lock app/yarn.lock
 RUN yarn install --prod --network-timeout 1000000
 
 FROM node:16-alpine
