@@ -20,17 +20,26 @@ export class FaceApiController {
   constructor(private faceApi: FaceApiService) {}
 
   @Post('/detect')
-  @ApiConsumes('multipart/form-data')
+  @ApiConsumes('multipart/form-data', 'application/json')
   @ApiMultiFile()
   @UseInterceptors(FilesInterceptor('files'))
-  async detectImage(@UploadedFiles() files: DetectImageDto[]) {
+  async detectImage(@Body() body, @UploadedFiles() files: DetectImageDto[]) {
+    let filesData = body.files || files || [];
+
     try {
-      const data = await Promise.all(
-        files.map((file) => this.faceApi.detectImage(file)),
-      );
+      // const data = await Promise.all(
+      //   filesData.map((file) => this.faceApi.detectImage(file)),
+      // );
+
+      const data = await this.faceApi.detectImage(filesData[0]);
+
       return { data };
     } catch (error) {
-      return ResponseMessage(error.errors[0].response, 'BAD_REQUEST');
+      console.log(
+        '🚀 ~ file: face-api.controller.ts:38 ~ FaceApiController ~ detectImage ~ error:',
+        error,
+      );
+      return ResponseMessage(error, 'BAD_REQUEST');
     }
   }
 

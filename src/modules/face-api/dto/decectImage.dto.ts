@@ -1,5 +1,7 @@
 export class DetectImageDto {
-  file: {
-    buffer: Uint8Array;
-  };
+  file:
+    | {
+        buffer: Uint8Array;
+      }
+    | string[];
 }

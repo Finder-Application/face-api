@@ -34,10 +34,17 @@ export class FaceApiService {
     return result;
   }
 
-  async detect(buffer: Buffer, options: faceApi.SsdMobilenetv1Options) {
-    const img = (await canvas.loadImage(
-      buffer,
-    )) as unknown as faceApi.TNetInput;
+  async detect(
+    data: Buffer | Uint8Array,
+    options: faceApi.SsdMobilenetv1Options,
+  ) {
+    let img;
+    if (data instanceof Buffer) {
+      img = (await canvas.loadImage(data)) as unknown as faceApi.TNetInput;
+    } else {
+      img = await this.decodeImageToTensor(data);
+    }
+
     const results = await faceApi
       .detectAllFaces(img, options)
       .withFaceLandmarks()
@@ -57,10 +64,10 @@ export class FaceApiService {
 
   // ** detect image by base64
   async detectImage(file: any) {
-    const img = (await canvas.loadImage(
-      file.buffer,
-    )) as unknown as faceApi.TNetInput;
-
+    console.log(
+      '🚀 ~ file: face-api.service.ts:67 ~ FaceApiService ~ detectImage ~ file:',
+      file,
+    );
     const optionsSSDMobileNet1 = new faceApi.SsdMobilenetv1Options({
       minConfidence: 0.5,
     });
@@ -68,6 +75,15 @@ export class FaceApiService {
     const optionsSSDMobileNet2 = new faceApi.SsdMobilenetv1Options({
       minConfidence: 0.2,
     });
+    if (typeof file == 'string') {
+      const unit8Array = this.convertBase64ToBinary(file);
+      const result = await Promise.any([
+        this.detect(unit8Array, optionsSSDMobileNet2),
+        this.detect(unit8Array, optionsSSDMobileNet1),
+      ]);
+      return result;
+    }
+
     const result = await Promise.any([
       this.detect(file.buffer, optionsSSDMobileNet2),
       this.detect(file.buffer, optionsSSDMobileNet1),
